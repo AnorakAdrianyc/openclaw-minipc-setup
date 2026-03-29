@@ -1,0 +1,454 @@
+{
+  "$schema": "https://raw.githubusercontent.com/openclaw/openclaw/main/config.schema.json",
+  "version": "2026.3.7",
+  "_lastUpdated": "2026-03-29T00:00:00Z",
+  "_device": "Morefine M9 Mini PC — Intel N150 | 16GB RAM | 2GB GPU",
+  "_author": "AnorakAdrianyc",
+
+  /* ===========================================
+     CORE IDENTITY
+     =========================================== */
+  "identity": {
+    "role": "AI Agent — Quantitative Finance & Hardware-Optimized Assistant",
+    "missionStatement": "Help complete work on constrained N150 hardware. Not to please.",
+    "neverAnthropomorphize": true,
+    "noFlatteryRule": true
+  },
+
+  /* ===========================================
+     MODEL CONFIGURATION
+     Prefers local Ollama to avoid API costs.
+     Falls back to Anthropic if local unavailable.
+     =========================================== */
+  "model": {
+    "provider": "ollama",
+    "modelName": "llama3.2:3b",
+    "fallbackProvider": "anthropic",
+    "fallbackModel": "claude-3-7-sonnet",
+    "temperature": 0.1,
+    "maxTokens": 4096,
+    "systemPrompt": "You are a professional, efficient AI assistant optimizing workflows for low-power Intel N150 hardware. Help complete quant and technical work. Not to please.",
+    "constrainedMode": {
+      "reasoningDepth": "focused",
+      "allowChainOfThought": false,
+      "bypassAttempts": "reject",
+      "memoryOptimized": true,
+      "batchSize": 32
+    }
+  },
+
+  /* ===========================================
+     LOCAL LLM BACKENDS (from Perplexity search)
+     Priority order for N150 CPU-only inference
+     =========================================== */
+  "localBackends": {
+    "primary": {
+      "name": "ollama",
+      "baseUrl": "http://ollama:11434",
+      "github": "https://github.com/ollama/ollama",
+      "recommendedModels": [
+        "llama3.2:3b",
+        "phi4-mini",
+        "gemma3:4b",
+        "mistral:7b-instruct-q4_K_M",
+        "qwen2.5:3b",
+        "deepseek-r1:7b-qwen-distill-q4_K_M",
+        "nomic-embed-text"
+      ],
+      "n150Notes": "Use Q4_K_M quantized models. Max 7B fits in 8GB. 3B runs smoothly with headroom."
+    },
+    "secondary": {
+      "name": "localai",
+      "baseUrl": "http://localai:8081",
+      "github": "https://github.com/mudler/LocalAI",
+      "modalities": ["llm", "tts", "stt", "image"],
+      "gpuRequired": false
+    },
+    "fallbackRemote": [
+      {
+        "name": "Hugging Face Spaces",
+        "url": "https://huggingface.co/spaces",
+        "cost": "free",
+        "notes": "Free inference for Hub models"
+      },
+      {
+        "name": "Google Colab",
+        "url": "https://colab.research.google.com",
+        "cost": "free T4 GPU",
+        "notes": "Run vLLM or HF Transformers"
+      }
+    ]
+  },
+
+  /* ===========================================
+     RESEARCH & VERIFICATION (MANDATORY)
+     =========================================== */
+  "research": {
+    "prioritizeVerification": true,
+    "requiredBeforeProductAdvice": [
+      "priceInformation",
+      "technicalSpecifications",
+      "recommendations"
+    ],
+    "webSearchEnabled": true,
+    "searchTools": ["brave", "tavily"],
+    "mustCiteSources": true,
+    "outdatedDataWarning": true,
+    "prohibitedWithoutVerification": [
+      "specific prices",
+      "product availability claims",
+      "feature lists without current confirmation"
+    ]
+  },
+
+  /* ===========================================
+     CRITICAL THINKING PROTOCOLS
+     =========================================== */
+  "criticalThinking": {
+    "challengeUserReasoning": true,
+    "skipBlindAgreement": true,
+    "directContradictionAllowed": true,
+    "hollowPraiseBanned": true,
+    "noGreatQuestionStarters": true,
+    "truthOverPoliteness": true
+  },
+
+  /* ===========================================
+     SECURITY (HARDENED — ISOLATED CONTAINER)
+     =========================================== */
+  "security": {
+    "credentialsPolicy": "neverStoreInLogs",
+    "apiKeyHandling": "environmentVariablesOnly",
+    "sensitivePatternsBlocked": [
+      "password=\\w+",
+      "api_key=\\w+",
+      "secret=\\w+",
+      "token=\\w+",
+      "api_secret=\\w+",
+      "access_token=\\w+"
+    ],
+    "sshSandboxing": true,
+    "commandExecutionRestricted": true,
+    "fileSystemAccess": "readLimited",
+    "externalNetworkCalls": "verifiedOnly",
+    "dockerIsolation": true,
+    "runAsNonRoot": true,
+    "financeApiSecurity": {
+      "brokerageCredentials": "encryptedStorage",
+      "apiRateLimits": "enforced",
+      "transactionLogging": "mandatory"
+    }
+  },
+
+  /* ===========================================
+     TOOL PERMISSIONS MATRIX
+     =========================================== */
+  "tools": {
+    "webSearch": { "enabled": true, "requiresConfirmation": false },
+    "filesystemRead": {
+      "enabled": true,
+      "restrictedPaths": ["/etc/passwd", "/etc/shadow", "~/.aws/*", "~/.ssh/*"],
+      "allowedPaths": ["~/project/**", "~/documents/**", "~/turboquant/**", "~/data/financial/**"]
+    },
+    "filesystemWrite": {
+      "enabled": true,
+      "requireApproval": false,
+      "maxFileSize": "100MB",
+      "safeDirectories": ["~/tmp/", "~/turboquant/results/", "~/data/cache/"]
+    },
+    "shellCommand": {
+      "enabled": true,
+      "safeCommandsOnly": true,
+      "forbiddenCommands": ["rm -rf", "sudo", "mkfs", "dd if=", ":(){ :|:& };:"],
+      "allowedCommands": [
+        "gcc -O3 -march=native -mtune=intel -o",
+        "python3 -m pip install --user",
+        "make -j2",
+        "git clone --depth=1",
+        "ollama pull",
+        "ollama run",
+        "docker compose"
+      ]
+    },
+    "email": { "enabled": false },
+    "database": {
+      "enabled": true,
+      "engine": "sqlite",
+      "connectionPooling": true,
+      "queryLogging": true,
+      "maxConnections": 4,
+      "timeout": 30
+    },
+    "financeApi": {
+      "enabled": true,
+      "rateLimit": 5,
+      "requestsPerSecond": 2,
+      "apiKeyValidation": "required"
+    }
+  },
+
+  /* ===========================================
+     TURBOQUANT — C-Based Quant Engine
+     REST API at http://turboquant:5050
+     =========================================== */
+  "turboquant": {
+    "enabled": true,
+    "version": "2026.3",
+    "baseUrl": "http://turboquant:5050",
+    "hardwareOptimized": {
+      "targetPlatform": "intel_n150",
+      "cpuCores": 4,
+      "maxMemoryUsage": "2GB",
+      "threadCount": 2,
+      "simdEnabled": true,
+      "vectorizedOperations": true
+    },
+    "components": {
+      "coreEngine": {
+        "language": "C",
+        "standard": "c11",
+        "optimizationLevel": "-O3",
+        "flags": ["-march=native", "-mtune=intel", "-ffast-math", "-fopenmp"],
+        "linkerFlags": ["-lm", "-lpthread"]
+      },
+      "dataProcessing": {
+        "maxBufferSize": "512MB",
+        "streamingEnabled": true,
+        "compression": "lz4"
+      },
+      "backtesting": {
+        "parallelExecution": false,
+        "timeframeLimit": "daily",
+        "maxHistoricalDays": 365
+      }
+    },
+    "functionBindings": [
+      "calculate_macd()",
+      "compute_rsi()",
+      "backtest_strategy()",
+      "optimize_portfolio()",
+      "process_time_series()"
+    ]
+  },
+
+  /* ===========================================
+     HARDWARE PROFILE — Morefine M9 / Elite Mini M9
+     =========================================== */
+  "hardware": {
+    "device": {
+      "manufacturer": "Morefine",
+      "model": "M9 Mini PC",
+      "cpu": "Intel N150 (4 cores, up to 3.6GHz)",
+      "ram": "16GB LPDDR5",
+      "gpu": "Intel UHD Graphics (2GB shared VRAM)",
+      "os": "Windows 11 + Docker Desktop (WSL2)",
+      "powerConsumption": "6W TDP",
+      "thermalDesign": "passiveCooling"
+    },
+    "constraints": {
+      "memoryManagement": {
+        "dockerMemoryLimit": "12GB",
+        "softLimit": "10GB",
+        "hardLimit": "12GB",
+        "gcFrequency": "aggressive",
+        "swapEnabled": true
+      },
+      "cpuGovernor": "balanced",
+      "thermalThrottling": {
+        "threshold": "70C",
+        "throttleBelow": "60C",
+        "monitoringInterval": "5s"
+      }
+    }
+  },
+
+  /* ===========================================
+     FORKED REPOS — Skill & Tool Registry
+     Your GitHub: AnorakAdrianyc
+     =========================================== */
+  "forkedRepoRegistry": {
+    "tier1_coreAgent": [
+      { "name": "agenticSeek", "url": "https://github.com/AnorakAdrianyc/agenticSeek", "use": "Local Manus AI fallback agent, no API cost" },
+      { "name": "OpenShell", "url": "https://github.com/AnorakAdrianyc/OpenShell", "use": "Hardened sandboxed execution runtime" },
+      { "name": "antigravity-awesome-skills", "url": "https://github.com/AnorakAdrianyc/antigravity-awesome-skills", "use": "1000+ skills for OpenClaw registry" },
+      { "name": "how-to-build-a-coding-agent", "url": "https://github.com/AnorakAdrianyc/how-to-build-a-coding-agent", "use": "Reference workshop for agent internals" },
+      { "name": "leaked-system-prompts", "url": "https://github.com/AnorakAdrianyc/leaked-system-prompts", "use": "Hardened system prompt reference" },
+      { "name": "mise", "url": "https://github.com/AnorakAdrianyc/mise", "use": "Dev tools, env var management, task runner" }
+    ],
+    "tier2_infrastructure": [
+      { "name": "MiroThinker", "url": "https://github.com/AnorakAdrianyc/MiroThinker", "use": "Deep research sub-agent" },
+      { "name": "airllm", "url": "https://github.com/AnorakAdrianyc/airllm", "use": "Layer-split 70B inference for 2GB VRAM" },
+      { "name": "BitNet", "url": "https://github.com/AnorakAdrianyc/BitNet", "use": "1-bit LLM inference, ultra low memory" },
+      { "name": "Scrapling", "url": "https://github.com/AnorakAdrianyc/Scrapling", "use": "Web data extraction skill hook" },
+      { "name": "NoteLLM", "url": "https://github.com/AnorakAdrianyc/NoteLLM", "use": "Lightweight LLM for Obsidian/memory" },
+      { "name": "WolframLanguageForJupyter", "url": "https://github.com/AnorakAdrianyc/WolframLanguageForJupyter", "use": "Math verification in agent workflows" },
+      { "name": "nvm", "url": "https://github.com/AnorakAdrianyc/nvm", "use": "Node.js version manager for OpenClaw" }
+    ],
+    "tier3_aiModelsFromSearch": [
+      { "name": "ollama", "url": "https://github.com/ollama/ollama", "use": "Primary local inference — in docker-compose" },
+      { "name": "open-webui", "url": "https://github.com/open-webui/open-webui", "use": "ChatGPT UI — in docker-compose" },
+      { "name": "LocalAI", "url": "https://github.com/mudler/LocalAI", "use": "OpenAI-compatible CPU API — in docker-compose" },
+      { "name": "AnythingLLM", "url": "https://github.com/Mintplex-Labs/anything-llm", "use": "RAG + agent workspace — in docker-compose" },
+      { "name": "llama.cpp", "url": "https://github.com/ggerganov/llama.cpp", "use": "C/C++ inference engine, GGUF models" },
+      { "name": "huggingface/transformers", "url": "https://github.com/huggingface/transformers", "use": "Python experimentation baseline" }
+    ]
+  },
+
+  /* ===========================================
+     OUTPUT FORMATTING
+     =========================================== */
+  "output": {
+    "concisenessLevel": "high",
+    "avoidRedundantExplanations": true,
+    "markdownPreferred": true,
+    "codeBlocksComplete": true,
+    "noEmDashExcess": true,
+    "minimumVerbosity": "low",
+    "maximumVerbosity": "medium",
+    "quantOutput": {
+      "precision": 6,
+      "scientificNotation": false,
+      "tableFormatting": true
+    }
+  },
+
+  /* ===========================================
+     DECISION MAKING
+     =========================================== */
+  "decisionMaking": {
+    "provideEvidenceBackedOptions": true,
+    "multipleChoiceScenario": "showAllValid",
+    "doNotSilentChoose": true,
+    "knownIssuesMustBeRaised": true,
+    "goodEnoughThreshold": "documentRisks",
+    "resourceConstraintsAware": true
+  },
+
+  /* ===========================================
+     PROHIBITED BEHAVIORS
+     =========================================== */
+  "prohibitedBehaviors": [
+    "start with hollow praise",
+    "give unverified product information",
+    "offer temporary shortcuts over root solutions",
+    "make decisions when multiple valid options exist",
+    "evade direct answers with vague qualifiers",
+    "repeat knowledge users already know",
+    "over-explain basic concepts",
+    "assume user intent without clarification",
+    "suggest memory-intensive operations without warning",
+    "propose strategies exceeding hardware limits",
+    "ignore thermal throttling concerns"
+  ],
+
+  /* ===========================================
+     MULTI-AGENT COORDINATION
+     =========================================== */
+  "multiAgent": {
+    "coordinatorEnabled": true,
+    "subAgents": {
+      "researcher": {
+        "triggers": ["research", "investigate", "find"],
+        "tools": ["read", "grep", "glob", "search"],
+        "backend": "MiroThinker"
+      },
+      "implementer": {
+        "triggers": ["implement", "create", "write", "compile"],
+        "tools": ["write", "bash", "edit", "gcc"]
+      },
+      "reviewer": {
+        "triggers": ["review", "audit", "check"],
+        "tools": ["read", "grep", "bash_test"]
+      },
+      "quantAnalyst": {
+        "triggers": ["quantify", "analyze", "backtest", "optimize"],
+        "tools": ["turboquant", "financeApi", "database"]
+      },
+      "securityReviewer": {
+        "triggers": ["security", "vulnerability", "harden"],
+        "tools": ["grep", "staticAnalysis", "OpenShell"]
+      }
+    },
+    "delegationMandatory": true,
+    "isolationBetweenSubAgents": true
+  },
+
+  /* ===========================================
+     WORKFLOW STATE MACHINE
+     =========================================== */
+  "workflow": {
+    "requirementClarification": true,
+    "sequentialSteps": [
+      "analyze_user_intent",
+      "verify_information_sources",
+      "identify_hardware_constraints",
+      "propose_solution_path",
+      "execute_with_verification",
+      "document_outcomes"
+    ],
+    "rollbackCapability": true,
+    "incrementalChangesOnly": true
+  },
+
+  /* ===========================================
+     ERROR HANDLING
+     =========================================== */
+  "errorHandling": {
+    "failFastProtocol": true,
+    "rootCauseInvestigation": true,
+    "temporaryWorkaroundsDiscouraged": true,
+    "transparentFailureReporting": true,
+    "alternativePathProposedWhenBlocked": true,
+    "hardwareLimitReachedAction": "switch_to_sampling_mode"
+  },
+
+  /* ===========================================
+     ENVIRONMENT VARIABLES
+     All secrets live in .env — never in this file
+     =========================================== */
+  "env": {
+    "readFromDotEnv": true,
+    "configFileOverride": "/root/.openclaw/.env",
+    "sensitiveVarsOnly": [
+      "OPENCLAW_API_KEY",
+      "ANTHROPIC_API_KEY",
+      "DATABASE_URL",
+      "FINANCE_API_KEY",
+      "JWT_SECRET",
+      "WEBUI_SECRET_KEY"
+    ],
+    "hardwareSpecific": {
+      "CPU_CORES": 4,
+      "MAX_MEMORY_GB": 12,
+      "COMPILER_FLAGS": "-O3 -march=native -mtune=intel"
+    }
+  },
+
+  /* ===========================================
+     METADATA & AUDIT
+     =========================================== */
+  "metadata": {
+    "enableAuditLog": true,
+    "logLevels": ["info", "warn", "error"],
+    "trackTokenUsage": true,
+    "sessionRecording": "optIn",
+    "configChangeHistory": true,
+    "quantMetrics": {
+      "sharpeRatioTracking": true,
+      "maxDrawdownMonitoring": true,
+      "volatilityCalculations": true
+    }
+  },
+
+  /* ===========================================
+     VALIDATION
+     =========================================== */
+  "validation": {
+    "preResponseSelfCheck": true,
+    "checkAgainstInstructions": true,
+    "timestampValidityAlert": true,
+    "versionConsistency": "notifyOnMismatch",
+    "magicPhraseTest": true,
+    "hardwareConstraintCheck": true
+  }
+}

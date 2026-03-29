@@ -1,0 +1,23 @@
+# Never commit secrets
+.env
+
+# Docker runtime
+.docker/
+
+# TurboQuant build artifacts
+turboquant/*.o
+turboquant/*.a
+turboquant/*.so
+turboquant/turboquant_server
+turboquant/results/
+turboquant/data/
+
+# OpenClaw runtime data
+openclaw/memory/
+openclaw/logs/
+openclaw/data/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
